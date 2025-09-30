@@ -161,7 +161,12 @@ if (!creds) {
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
 			if (url) {
-				const res = await this.helpers.httpRequest({ method: 'GET', url, json: true });
+				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
+						method: 'GET',
+						url,
+						json: true,
+			});
+
 				if (res) crosswalk = res as Crosswalk;
 			}
 		} catch {
