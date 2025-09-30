@@ -1,0 +1,99 @@
+{
+  "name": "cyberpulse-template.json",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3f3f6e88-b8d4-4f9d-9cb5-953352b333e5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod/v1/health",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "5516443f-1c05-459a-be7d-db2edfb7ec55",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "LfxHi3r9i644nTHM",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod/v1/evaluate-controls",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"framework\":\"NIST CSF\",\"controls\":[\"AC-2\"],\"evidence\":[]}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "58865c17-e54f-4934-81c8-e6381f5c694b",
+      "name": "HTTP Request1",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "LfxHi3r9i644nTHM",
+          "name": "CyberPulse Ai"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9b3f92c1-91bd-4575-ba8b-c2a8429914e4",
+  "meta": {
+    "instanceId": "6feff41aadeb8409737e26476f9d0a45f95eec6a9c16afff8ef87a662455b6df"
+  },
+  "id": "NIoqinVfpMRY3sBM",
+  "tags": []
+}
