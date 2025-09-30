@@ -46,10 +46,12 @@
   ],
   "n8n": {
     "n8nNodesApiVersion": 1,
-    "credentials": [],
-    "nodes": [
-      "dist/nodes/CyberPulseCompliance/CyberPulseCompliance.node.js"
-    ]
+    "credentials": [
+    "dist/credentials/HttpHeaderAuth.credentials.js"
+  ],
+  "nodes": [
+    "dist/nodes/CyberPulseCompliance/CyberPulseCompliance.node.js"
+  ]
   },
   "devDependencies": {
     "@typescript-eslint/parser": "~8.32.0",

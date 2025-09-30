@@ -78,16 +78,12 @@ function scoreFor(categories: string[], evidenceCount: number): { score: number;
 	const weights: Record<string, number> = { mfa: 25, encryption: 20, logging: 15, backups: 15, patching: 15, access_reviews: 10 };
 	let raw = 0;
 	for (const c of categories) raw += weights[c] ?? 0;
-
-	// evidence boost (up to +10)
 	const boost = Math.min(evidenceCount * 5, 10);
 	let score = Math.min(raw + boost, 100);
-
 	let status: 'Compliant' | 'Partial' | 'Non-Compliant';
 	if (score >= 85) status = 'Compliant';
 	else if (score >= 60) status = 'Partial';
 	else status = 'Non-Compliant';
-
 	return { score, status };
 }
 
@@ -102,9 +98,10 @@ export class CyberPulseCompliance implements INodeType {
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
-		credentials: [
-			{ name: 'httpHeaderAuth', required: true }
-		],	
+
+		// 👇 THIS makes the Credentials panel appear (uses built-in HTTP Header Auth)
+		credentials: [{ name: 'httpHeaderAuth', required: true }],
+
 		properties: [
 			{
 				displayName: 'Control Text',
@@ -124,19 +121,19 @@ export class CyberPulseCompliance implements INodeType {
 				description: 'Links to proofs (dashboards, reports, configs)',
 			},
 			{
- 				displayName: 'Frameworks',
-  				name: 'frameworks',
- 				type: 'multiOptions',
- 				default: ['Essential Eight', 'GDPR', 'ISO 27001', 'NIST CSF', 'PCI DSS', 'SOC 2'],
-  				options: [
-   					 { name: 'Essential Eight', value: 'essential8' },
-   					 { name: 'GDPR', value: 'gdpr' },
-  					 { name: 'ISO 27001', value: 'iso27001' },
-  					 { name: 'NIST CSF', value: 'nistcsf' },
-    					 { name: 'PCI DSS', value: 'pcidss' },
-   					 { name: 'SOC 2', value: 'soc2' },
- 				 ],
-  				 description: 'Frameworks to map against',
+				displayName: 'Frameworks',
+				name: 'frameworks',
+				type: 'multiOptions',
+				default: ['Essential Eight', 'GDPR', 'ISO 27001', 'NIST CSF', 'PCI DSS', 'SOC 2'],
+				options: [
+					{ name: 'Essential Eight', value: 'essential8' },
+					{ name: 'GDPR', value: 'gdpr' },
+					{ name: 'ISO 27001', value: 'iso27001' },
+					{ name: 'NIST CSF', value: 'nistcsf' },
+					{ name: 'PCI DSS', value: 'pcidss' },
+					{ name: 'SOC 2', value: 'soc2' },
+				],
+				description: 'Frameworks to map against',
 			},
 			{
 				displayName: 'Crosswalk URL',
@@ -151,24 +148,27 @@ export class CyberPulseCompliance implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		// Require API key (httpHeaderAuth) before running
-const creds = await this.getCredentials('httpHeaderAuth').catch(() => null);
-if (!creds) {
-	throw new this.NodeOperationError(this.getNode(), 'CyberPulse API key is required. Open the node → Credentials → Create new → paste your key → Test.');
-}
+		const creds = await this.getCredentials('httpHeaderAuth').catch(() => null);
+		if (!creds) {
+			throw new NodeOperationError(
+				this.getNode(),
+				'CyberPulse API key is required. Open the node → Credentials → Create new → paste your key → Test.',
+			);
+		}
+
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
 
-		// Load crosswalk via n8n HTTP helper if URL provided
+		// Load crosswalk via n8n helper if URL provided (uses the credential)
 		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
 			if (url) {
 				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
-						method: 'GET',
-						url,
-						json: true,
-			});
-
+					method: 'GET',
+					url,
+					json: true,
+				});
 				if (res) crosswalk = res as Crosswalk;
 			}
 		} catch {
@@ -181,18 +181,15 @@ if (!creds) {
 				const evidenceUrls = (this.getNodeParameter('evidenceUrls', i, []) as string[]) || [];
 				const frameworks = (this.getNodeParameter('frameworks', i, []) as string[]) || [];
 
-				// 1) classify + score
 				const categories = classifyCategories(controlText);
 				let { score, status } = scoreFor(categories, evidenceUrls.length);
 
-				// 2) enforce evidence rule: no evidence ⇒ at most Partial + add gap
 				const gaps: string[] = [];
 				if (evidenceUrls.length === 0) {
 					if (status === 'Compliant') status = 'Partial';
 					gaps.push('No evidence provided');
 				}
 
-				// 3) map requirements (selected frameworks only)
 				const mapped: Clause[] = [];
 				for (const cat of categories) {
 					const fwMap = crosswalk[cat] || {};
@@ -202,7 +199,6 @@ if (!creds) {
 					}
 				}
 
-				// 4) suggested actions
 				const actions = [
 					...(categories.includes('mfa') ? ['Confirm MFA enforced for all privileged accounts'] : []),
 					...(categories.includes('encryption') ? ['Verify encryption at rest & in transit'] : []),
