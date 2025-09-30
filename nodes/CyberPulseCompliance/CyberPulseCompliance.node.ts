@@ -96,7 +96,7 @@ export class CyberPulseCompliance implements INodeType {
 		displayName: 'CyberPulse Compliance',
 		name: 'cyberPulseCompliance',
 		group: ['transform'],
-		version: 2,
+		version: 3,
 		description: 'Evaluate a control & evidence, map to selected frameworks, and return a score/status.',
 		defaults: { name: 'CyberPulse Compliance' },
 		inputs: [NodeConnectionType.Main],
