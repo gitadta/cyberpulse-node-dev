@@ -102,7 +102,9 @@ export class CyberPulseCompliance implements INodeType {
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
-		credentials: [{ name: 'httpHeaderAuth', required: true }],	
+		credentials: [
+			{ name: 'httpHeaderAuth', required: true }
+		],	
 		properties: [
 			{
 				displayName: 'Control Text',
