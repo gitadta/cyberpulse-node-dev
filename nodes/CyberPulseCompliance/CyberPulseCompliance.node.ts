@@ -148,6 +148,11 @@ export class CyberPulseCompliance implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
+		// Require API key (httpHeaderAuth) before running
+const creds = await this.getCredentials('httpHeaderAuth').catch(() => null);
+if (!creds) {
+	throw new this.NodeOperationError(this.getNode(), 'CyberPulse API key is required. Open the node → Credentials → Create new → paste your key → Test.');
+}
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
 
