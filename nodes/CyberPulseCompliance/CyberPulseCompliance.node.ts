@@ -98,10 +98,10 @@ export class CyberPulseCompliance implements INodeType {
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
+		credentials: [{ name: 'httpHeaderAuthApi', required: true }],
 
 		// 👇 THIS makes the Credentials panel appear (uses built-in HTTP Header Auth)
-		credentials: [{ name: 'httpHeaderAuth', required: true }],
-
+		
 		properties: [
 			{
 				displayName: 'Control Text',
