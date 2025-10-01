@@ -11,7 +11,7 @@ type Clause = { framework: string; clause: string; title: string };
 type Crosswalk = Record<string, Record<string, Clause[]>>;
 
 /** Your API Gateway base URL (override with env CP_API_BASE if needed) */
-const API_BASE ='https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
+const API_BASE = 'https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
 
 const DEFAULT_CROSSWALK: Crosswalk = {
 	mfa: {
@@ -178,13 +178,12 @@ export class CyberPulseCompliance implements INodeType {
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
 
-		/** ─────────────────────────────────────────────────────────────────
-		 *  Hit the metered API (/v1/evaluate-controls) so usage plan+codes apply
-		 *  ───────────────────────────────────────────────────────────────── */
+		/** Hit the metered API so usage plan + friendly codes apply */
 		try {
 			await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
 				method: 'POST',
 				url: `${API_BASE}/v1/evaluate-controls`,
+				headers: { 'x-force-402': '1' }, // TEMP: trigger friendly 402
 				json: true,
 				body: {
 					framework: 'NIST CSF',
@@ -204,7 +203,7 @@ export class CyberPulseCompliance implements INodeType {
 			throw err;
 		}
 
-		// Load optional crosswalk via authenticated request; surface friendly metered API errors
+		// Optional crosswalk fetch (also via Header Auth)
 		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
