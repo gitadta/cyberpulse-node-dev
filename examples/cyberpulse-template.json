@@ -5,12 +5,8 @@
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [
-        0,
-        0
-      ],
-      "id": "3f3f6e88-b8d4-4f9d-9cb5-953352b333e5",
-      "name": "When clicking ‘Execute workflow’"
+      "position": [0, 0],
+      "name": "When clicking \"Execute workflow\""
     },
     {
       "parameters": {
@@ -21,17 +17,10 @@
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [
-        208,
-        0
-      ],
-      "id": "5516443f-1c05-459a-be7d-db2edfb7ec55",
+      "position": [208, 0],
       "name": "HTTP Request",
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "LfxHi3r9i644nTHM",
-          "name": "Header Auth account"
-        }
+        "httpHeaderAuth": { "name": "CyberPulse API Key" }
       }
     },
     {
@@ -42,58 +31,22 @@
         "genericAuthType": "httpHeaderAuth",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "{\"framework\":\"NIST CSF\",\"controls\":[\"AC-2\"],\"evidence\":[]}\n",
-        "options": {}
+        "jsonBody": "{\"framework\":\"NIST CSF\",\"controls\":[\"AC-2\"],\"evidence\":[]}"
       },
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
-      "position": [
-        416,
-        0
-      ],
-      "id": "58865c17-e54f-4934-81c8-e6381f5c694b",
-      "name": "HTTP Request1",
+      "position": [416, 0],
+      "name": "HTTP Request (Evaluate)",
       "credentials": {
-        "httpHeaderAuth": {
-          "id": "LfxHi3r9i644nTHM",
-          "name": "CyberPulse Ai"
-        }
+        "httpHeaderAuth": { "name": "CyberPulse API Key" }
       }
     }
   ],
-  "pinData": {},
   "connections": {
-    "When clicking ‘Execute workflow’": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "HTTP Request": {
-      "main": [
-        [
-          {
-            "node": "HTTP Request1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    }
+    "When clicking \"Execute workflow\"": { "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]] },
+    "HTTP Request": { "main": [[{ "node": "HTTP Request (Evaluate)", "type": "main", "index": 0 }]] }
   },
   "active": false,
-  "settings": {
-    "executionOrder": "v1"
-  },
-  "versionId": "9b3f92c1-91bd-4575-ba8b-c2a8429914e4",
-  "meta": {
-    "instanceId": "6feff41aadeb8409737e26476f9d0a45f95eec6a9c16afff8ef87a662455b6df"
-  },
-  "id": "NIoqinVfpMRY3sBM",
+  "settings": { "executionOrder": "v1" },
   "tags": []
 }
