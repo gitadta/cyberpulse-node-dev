@@ -79,7 +79,7 @@ function scoreFor(categories: string[], evidenceCount: number): { score: number;
 	let raw = 0;
 	for (const c of categories) raw += weights[c] ?? 0;
 	const boost = Math.min(evidenceCount * 5, 10);
-	let score = Math.min(raw + boost, 100);
+	const score = Math.min(raw + boost, 100);
 	let status: 'Compliant' | 'Partial' | 'Non-Compliant';
 	if (score >= 85) status = 'Compliant';
 	else if (score >= 60) status = 'Partial';
@@ -99,8 +99,8 @@ export class CyberPulseCompliance implements INodeType {
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
 
-		// use unique credential type (with Api suffix)
-		credentials: [{ name: 'cyberPulseHttpHeaderAuthApi', required: true }],
+		// Use built-in HTTP Header Auth credential
+		credentials: [{ name: 'httpHeaderAuth', required: true }],
 
 		properties: [
 			{
@@ -147,27 +147,25 @@ export class CyberPulseCompliance implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		const _creds = await this.getCredentials('cyberPulseHttpHeaderAuthApi').catch(() => null);
-		if (!_creds) {
-			throw new NodeOperationError(this.getNode(), 'DEBUG: missing creds v5');
+		// Ensure the credential exists
+		const hasCreds = await this.getCredentials('httpHeaderAuth').catch(() => null);
+		if (!hasCreds) {
+			throw new NodeOperationError(this.getNode(), 'Missing credentials: select “HTTP Header Auth” and save.');
 		}
 
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
 
+		// Load optional crosswalk via authenticated request (so the credential is actually used)
 		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
 			if (url) {
-				const res = await this.helpers.httpRequestWithAuthentication.call(
-					this,
-					'cyberPulseHttpHeaderAuthApi',
-					{
-						method: 'GET',
-						url,
-						json: true,
-					},
-				);
+				const res = await this.helpers.requestWithAuthentication.call(this, 'httpHeaderAuth', {
+					method: 'GET',
+					url,
+					json: true,
+				});
 				if (res) crosswalk = res as Crosswalk;
 			}
 		} catch {
@@ -205,7 +203,7 @@ export class CyberPulseCompliance implements INodeType {
 					...(categories.includes('backups') ? ['Test restores to validate RPO/RTO targets'] : []),
 					...(categories.includes('patching') ? ['Apply critical patches within policy SLA'] : []),
 					...(categories.includes('access_reviews') ? ['Perform quarterly access recertifications'] : []),
-					...(evidenceUrls.length === 0) ? ['Attach relevant evidence links'] : [],
+					...(evidenceUrls.length === 0 ? ['Attach relevant evidence links'] : []),
 				];
 
 				output.push({

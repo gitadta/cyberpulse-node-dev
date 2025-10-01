@@ -1,75 +1,71 @@
 {
-"name": "n8n-nodes-cyberpulse-compliance-dev",
-"displayName": "CyberPulse Compliance",
-"version": "0.0.11",
-"description": "Evaluate control statements against frameworks (ISO 27001, NIST CSF, PCI DSS, Essential Eight, GDPR) with evidence-aware scoring and external crosswalk mappings.",
-"keywords": [
-"n8n",
-"n8n-community-node-package",
-"compliance",
-"security",
-"iso27001",
-"nist",
-"pci",
-"essential-eight",
-"gdpr"
-],
-"license": "MIT",
-"homepage": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/
-",
-"author": {
-"name": "Adnan Tariq",
-"email": "info@cyberpulsesolutions.com
-"
-],
-"repository": {
-"type": "git",
-"url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance.git
-"
-],
-"bugs": {
-"url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/issues
-"
-],
-"engines": {
-"node": ">=20.15"
-},
-"main": "dist/nodes/CyberPulseCompliance/CyberPulseCompliance.node.js",
-"scripts": {
-"build": "npx rimraf dist && tsc && gulp build:icons",
-"dev": "tsc --watch",
-"format": "prettier nodes --write",
-"lint": "eslint nodes package.json",
-"lintfix": "eslint nodes package.json --fix",
-"prepublishOnly": "npm run build && eslint -c .eslintrc.prepublish.js nodes package.json"
-},
-"files": [
-"dist/credentials/.js",
-"dist/nodes/**/.js",
-"README.md",
-"LICENSE"
-],
-"n8n": {
-"n8nNodesApiVersion": 1,
-"credentials": [
-"dist/credentials/CyberPulseHttpHeaderAuth.credentials.js"
-],
-"nodes": [
-"dist/nodes/CyberPulseCompliance/CyberPulseCompliance.node.js"
-]
-},
-"devDependencies": {
-"@typescript-eslint/parser": "~8.32.0",
-"eslint": "^8.57.0",
-"eslint-plugin-n8n-nodes-base": "^1.16.3",
-"gulp": "^5.0.0",
-"prettier": "^3.5.3",
-"typescript": "^5.8.2"
-},
-"peerDependencies": {
-"n8n-workflow": "*"
-},
-"publishConfig": {
-"access": "public"
-}
+  "name": "n8n-nodes-cyberpulse-compliance-dev",
+  "displayName": "CyberPulse Compliance",
+  "version": "0.0.12",
+  "description": "Evaluate control statements against frameworks (ISO 27001, NIST CSF, PCI DSS, Essential Eight, GDPR) with evidence-aware scoring and external crosswalk mappings.",
+  "keywords": [
+    "n8n",
+    "n8n-community-node-package",
+    "compliance",
+    "security",
+    "iso27001",
+    "nist",
+    "pci",
+    "essential-eight",
+    "gdpr"
+  ],
+  "license": "MIT",
+  "homepage": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/",
+  "author": {
+    "name": "Adnan Tariq",
+    "email": "info@cyberpulsesolutions.com"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance.git"
+  },
+  "bugs": {
+    "url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "main": "dist/nodes/CyberPulseCompliance/CyberPulseCompliance.node.js",
+  "scripts": {
+    "build": "npx rimraf dist && tsc && gulp build:icons",
+    "dev": "tsc --watch",
+    "format": "prettier nodes --write",
+    "lint": "eslint nodes package.json",
+    "lintfix": "eslint nodes package.json --fix",
+    "prepublishOnly": "npm run build && eslint -c .eslintrc.prepublish.js nodes package.json"
+  },
+  "files": [
+    "dist/credentials/*.js",
+    "dist/nodes/**/*.js",
+    "README.md",
+    "LICENSE"
+  ],
+  "n8n": {
+    "n8nNodesApiVersion": 1,
+    "credentials": [
+      "dist/credentials/CyberPulseHttpHeaderAuth.credentials.js"
+    ],
+    "nodes": [
+      "dist/nodes/CyberPulseCompliance/CyberPulseCompliance.node.js"
+    ]
+  },
+  "devDependencies": {
+    "@typescript-eslint/parser": "~8.32.0",
+    "eslint": "^8.57.0",
+    "eslint-plugin-n8n-nodes-base": "^1.16.3",
+    "gulp": "^5.0.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.2"
+  },
+  "peerDependencies": {
+    "n8n-workflow": "*"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }
