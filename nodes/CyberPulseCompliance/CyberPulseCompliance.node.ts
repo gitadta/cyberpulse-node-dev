@@ -74,7 +74,10 @@ function classifyCategories(text: string): string[] {
 	return Array.from(hits);
 }
 
-function scoreFor(categories: string[], evidenceCount: number): { score: number; status: 'Compliant' | 'Partial' | 'Non-Compliant' } {
+function scoreFor(
+	categories: string[],
+	evidenceCount: number,
+): { score: number; status: 'Compliant' | 'Partial' | 'Non-Compliant' } {
 	const weights: Record<string, number> = { mfa: 25, encryption: 20, logging: 15, backups: 15, patching: 15, access_reviews: 10 };
 	let raw = 0;
 	for (const c of categories) raw += weights[c] ?? 0;
@@ -85,6 +88,23 @@ function scoreFor(categories: string[], evidenceCount: number): { score: number;
 	else if (score >= 60) status = 'Partial';
 	else status = 'Non-Compliant';
 	return { score, status };
+}
+
+/** Friendly messages for metered API HTTP statuses */
+const FRIENDLY_STATUS: Record<number, string> = {
+	401: 'Unauthorized – missing/invalid API key',
+	402: 'Payment required / plan issue',
+	403: 'Forbidden – key not allowed for this call',
+	429: 'Too many requests – rate limited',
+};
+
+function extractHttpStatus(err: any): number | undefined {
+	// Axios-style errors (used by n8n under the hood)
+	return err?.response?.status ?? err?.cause?.response?.status ?? err?.status;
+}
+
+function extractHttpBody(err: any): unknown {
+	return err?.response?.data ?? err?.cause?.response?.data ?? err?.message;
 }
 
 export class CyberPulseCompliance implements INodeType {
@@ -156,20 +176,32 @@ export class CyberPulseCompliance implements INodeType {
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
 
-		// Load optional crosswalk via authenticated request (so the credential is actually used)
+		// Load optional crosswalk via authenticated request; surface friendly metered API errors
 		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
 			if (url) {
-				const res = await this.helpers.requestWithAuthentication.call(this, 'httpHeaderAuth', {
+				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
 					method: 'GET',
 					url,
 					json: true,
 				});
 				if (res) crosswalk = res as Crosswalk;
 			}
-		} catch {
-			/* keep default */
+		} catch (err) {
+			const status = extractHttpStatus(err);
+			if (status && FRIENDLY_STATUS[status]) {
+				const desc = extractHttpBody(err);
+				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[status], {
+					description: typeof desc === 'string' ? desc : JSON.stringify(desc ?? {}),
+					itemIndex: 0,
+				});
+			}
+			// Otherwise keep default crosswalk but surface a concise error
+			throw new NodeOperationError(this.getNode(), 'Failed to fetch crosswalk JSON', {
+				description: (err as Error)?.message ?? 'Request failed',
+				itemIndex: 0,
+			});
 		}
 
 		for (let i = 0; i < items.length; i++) {
