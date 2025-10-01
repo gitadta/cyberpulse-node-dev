@@ -1,3 +1,18 @@
+## Try it in 60 seconds
+
+1) Download the ready-to-import workflow:
+   - **Raw JSON (direct import)**  
+     https://raw.githubusercontent.com/gitadta/n8n-nodes-cyberpulse-compliance/dev/examples/cyberpulse-template.json
+   - **Browse in GitHub (human-readable)**  
+     https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/blob/dev/examples/cyberpulse-template.json
+
+2) In n8n: **Workflows → Import from file** and select the JSON.
+
+3) When prompted, select/create the **Header Auth** credential (paste your CyberPulse API key as the `Authorization` header value, e.g. `Bearer <YOUR_KEY>`).
+
+4) Click **Execute workflow**.
+
+
 ## Getting Started (3 steps)
 
 1) Install node: **Community Nodes → n8n-nodes-cyberpulse-compliance-dev**
