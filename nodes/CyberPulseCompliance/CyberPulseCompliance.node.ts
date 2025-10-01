@@ -10,6 +10,9 @@ import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
 type Clause = { framework: string; clause: string; title: string };
 type Crosswalk = Record<string, Record<string, Clause[]>>;
 
+/** Your API Gateway base URL (override with env CP_API_BASE if needed) */
+const API_BASE ='https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
+
 const DEFAULT_CROSSWALK: Crosswalk = {
 	mfa: {
 		'ISO 27001': [{ clause: 'A.5.17', title: 'Authentication information', framework: 'ISO 27001' }],
@@ -99,7 +102,6 @@ const FRIENDLY_STATUS: Record<number, string> = {
 };
 
 function extractHttpStatus(err: any): number | undefined {
-	// Axios-style errors (used by n8n under the hood)
 	return err?.response?.status ?? err?.cause?.response?.status ?? err?.status;
 }
 
@@ -176,6 +178,32 @@ export class CyberPulseCompliance implements INodeType {
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
 
+		/** ─────────────────────────────────────────────────────────────────
+		 *  Hit the metered API (/v1/evaluate-controls) so usage plan+codes apply
+		 *  ───────────────────────────────────────────────────────────────── */
+		try {
+			await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
+				method: 'POST',
+				url: `${API_BASE}/v1/evaluate-controls`,
+				json: true,
+				body: {
+					framework: 'NIST CSF',
+					controls: ['AC-2'],
+					evidence: [],
+				},
+			});
+		} catch (err) {
+			const status = extractHttpStatus(err);
+			if (status && FRIENDLY_STATUS[status]) {
+				const desc = extractHttpBody(err);
+				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[status], {
+					description: typeof desc === 'string' ? desc : JSON.stringify(desc ?? {}),
+					itemIndex: 0,
+				});
+			}
+			throw err;
+		}
+
 		// Load optional crosswalk via authenticated request; surface friendly metered API errors
 		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
 		try {
@@ -197,7 +225,6 @@ export class CyberPulseCompliance implements INodeType {
 					itemIndex: 0,
 				});
 			}
-			// Otherwise keep default crosswalk but surface a concise error
 			throw new NodeOperationError(this.getNode(), 'Failed to fetch crosswalk JSON', {
 				description: (err as Error)?.message ?? 'Request failed',
 				itemIndex: 0,
