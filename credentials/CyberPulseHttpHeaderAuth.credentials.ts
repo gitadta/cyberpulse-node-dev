@@ -1,7 +1,7 @@
 // credentials/CyberPulseHttpHeaderAuth.credentials.ts
 import type { ICredentialType, ICredentialTestRequest, INodeProperties } from 'n8n-workflow';
 
-export class CyberPulseHttpHeaderAuthApi implements ICredentialType {
+export class CyberPulseHttpHeaderAuth implements ICredentialType {
   name = 'cyberPulseHttpHeaderAuthApi';
   displayName = 'CyberPulse HTTP Header Auth';
 
