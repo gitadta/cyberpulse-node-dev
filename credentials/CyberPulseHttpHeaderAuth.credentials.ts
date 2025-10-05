@@ -2,9 +2,8 @@
 import type { ICredentialType, ICredentialTestRequest, INodeProperties } from 'n8n-workflow';
 
 export class CyberPulseHttpHeaderAuth implements ICredentialType {
-  // keep the "name" property with -Api (that’s what the linter wanted)
   name = 'cyberPulseHttpHeaderAuthApi';
-  displayName = 'CyberPulse Header';
+  displayName = 'CyberPulse HTTP Header Auth';
 
   properties: INodeProperties[] = [
     {
@@ -13,7 +12,7 @@ export class CyberPulseHttpHeaderAuth implements ICredentialType {
       type: 'string',
       typeOptions: { password: true },
       default: '',
-      description: 'Sent as x-api-key: <API Key>',
+      description: 'Sent as x-api-key header',
     },
   ];
 
@@ -26,6 +25,7 @@ export class CyberPulseHttpHeaderAuth implements ICredentialType {
     },
   };
 
+  // verify header is attached
   test: ICredentialTestRequest = {
     request: { url: 'https://httpbin.org/headers', method: 'GET' },
   };

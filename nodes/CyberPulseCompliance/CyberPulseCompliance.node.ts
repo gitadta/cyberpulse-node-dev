@@ -11,7 +11,7 @@ type Clause = { framework: string; clause: string; title: string };
 type Crosswalk = Record<string, Record<string, Clause[]>>;
 
 /** Your API Gateway base URL (override with env CP_API_BASE if needed) */
-const API_BASE = 'https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
+const API_BASE = process.env.CP_API_BASE ?? 'https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
 
 const DEFAULT_CROSSWALK: Crosswalk = {
 	mfa: {
@@ -121,7 +121,7 @@ export class CyberPulseCompliance implements INodeType {
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
 
-		// Use our custom HTTP Header credential
+		// Use our custom HTTP Header credential (x-api-key)
 		credentials: [{ name: 'cyberPulseHttpHeaderAuthApi', required: true }],
 
 		properties: [
@@ -207,7 +207,7 @@ export class CyberPulseCompliance implements INodeType {
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
 			if (url) {
-				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'cyberPulseHttpHeaderAuthApi', {
+				const res = await this.helpers.httpRequest({
 					method: 'GET',
 					url,
 					json: true,
