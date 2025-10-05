@@ -183,7 +183,7 @@ export class CyberPulseCompliance implements INodeType {
 			await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
 				method: 'POST',
 				url: `${API_BASE}/v1/evaluate-controls`,
-				headers: { 'x-force-402': '1' }, // TEMP: trigger friendly 402
+				
 				json: true,
 				body: {
 					framework: 'NIST CSF',
