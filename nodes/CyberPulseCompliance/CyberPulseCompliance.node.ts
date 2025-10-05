@@ -111,18 +111,18 @@ function extractHttpBody(err: any): unknown {
 
 export class CyberPulseCompliance implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'CyberPulse Compliance v5',
+		displayName: 'CyberPulse Compliance (Dev 0.0.19)',
 		name: 'cyberPulseCompliance',
 		group: ['transform'],
 		version: 6,
 		description: 'Evaluate a control & evidence, map to selected frameworks, and return a score/status.',
-		defaults: { name: 'CyberPulse Compliance' },
+		defaults: { name: 'CyberPulse Compliance (Dev 0.0.19)' },
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
 
 		// Use built-in HTTP Header Auth credential
-		credentials: [{ name: 'httpHeaderAuth', required: true }],
+		credentials: [{ name: 'cyberPulseHeaderApi', required: true }],
 
 		properties: [
 			{

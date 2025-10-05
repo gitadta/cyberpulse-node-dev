@@ -1,9 +1,9 @@
 // credentials/CyberPulseHttpHeaderAuth.credentials.ts
 import type { ICredentialType, ICredentialTestRequest, INodeProperties } from 'n8n-workflow';
 
-export class CyberPulseHttpHeaderAuth implements ICredentialType {
-  name = 'cyberPulseHttpHeaderAuthApi';
-  displayName = 'CyberPulse HTTP Header Auth';
+export class CyberPulseHeader implements ICredentialType {
+  name = 'cyberPulseHeaderApi';
+  displayName = 'CyberPulse Header';
 
   properties: INodeProperties[] = [
     {
@@ -12,7 +12,7 @@ export class CyberPulseHttpHeaderAuth implements ICredentialType {
       type: 'string',
       typeOptions: { password: true },
       default: '',
-      description: 'Sent as Authorization: Bearer <API Key>',
+      description: 'Sent as x-api-key: <API Key>',
     },
   ];
 
@@ -20,12 +20,12 @@ export class CyberPulseHttpHeaderAuth implements ICredentialType {
     type: 'generic' as const,
     properties: {
       headers: {
-        Authorization: 'Bearer {{$credentials.apiKey}}',
+        'x-api-key': '{{$credentials.apiKey}}',
       },
     },
   };
 
   test: ICredentialTestRequest = {
-    request: { url: 'https://httpbin.org/bearer', method: 'GET' },
+    request: { url: 'https://httpbin.org/headers', method: 'GET' },
   };
 }
