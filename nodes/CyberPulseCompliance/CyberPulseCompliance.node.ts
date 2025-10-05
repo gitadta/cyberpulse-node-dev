@@ -11,8 +11,7 @@ type Clause = { framework: string; clause: string; title: string };
 type Crosswalk = Record<string, Record<string, Clause[]>>;
 
 /** Your API Gateway base URL (override with env CP_API_BASE if needed) */
-const API_BASE = process.env.CP_API_BASE ?? 'https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
-
+const API_BASE = 'https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
 const DEFAULT_CROSSWALK: Crosswalk = {
 	mfa: {
 		'ISO 27001': [{ clause: 'A.5.17', title: 'Authentication information', framework: 'ISO 27001' }],
