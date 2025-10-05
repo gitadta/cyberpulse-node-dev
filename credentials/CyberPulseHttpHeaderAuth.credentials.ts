@@ -1,8 +1,9 @@
 // credentials/CyberPulseHttpHeaderAuth.credentials.ts
 import type { ICredentialType, ICredentialTestRequest, INodeProperties } from 'n8n-workflow';
 
-export class CyberPulseHeader implements ICredentialType {
-  name = 'cyberPulseHeaderApi';
+export class CyberPulseHttpHeaderAuth implements ICredentialType {
+  // keep the "name" property with -Api (that’s what the linter wanted)
+  name = 'cyberPulseHttpHeaderAuthApi';
   displayName = 'CyberPulse Header';
 
   properties: INodeProperties[] = [

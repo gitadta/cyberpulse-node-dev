@@ -121,8 +121,8 @@ export class CyberPulseCompliance implements INodeType {
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
 
-		// Use built-in HTTP Header Auth credential
-		credentials: [{ name: 'cyberPulseHeaderApi', required: true }],
+		// Use our custom HTTP Header credential
+		credentials: [{ name: 'cyberPulseHttpHeaderAuthApi', required: true }],
 
 		properties: [
 			{
@@ -170,9 +170,9 @@ export class CyberPulseCompliance implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		// Ensure the credential exists
-		const hasCreds = await this.getCredentials('httpHeaderAuth').catch(() => null);
+		const hasCreds = await this.getCredentials('cyberPulseHttpHeaderAuthApi').catch(() => null);
 		if (!hasCreds) {
-			throw new NodeOperationError(this.getNode(), 'Missing credentials: select “HTTP Header Auth” and save.');
+			throw new NodeOperationError(this.getNode(), 'Missing credentials: select “CyberPulse Header” and save.');
 		}
 
 		const items = this.getInputData();
@@ -180,10 +180,9 @@ export class CyberPulseCompliance implements INodeType {
 
 		/** Hit the metered API so usage plan + friendly codes apply */
 		try {
-			await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
+			await this.helpers.httpRequestWithAuthentication.call(this, 'cyberPulseHttpHeaderAuthApi', {
 				method: 'POST',
 				url: `${API_BASE}/v1/evaluate-controls`,
-				
 				json: true,
 				body: {
 					framework: 'NIST CSF',
@@ -208,7 +207,7 @@ export class CyberPulseCompliance implements INodeType {
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
 			if (url) {
-				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'httpHeaderAuth', {
+				const res = await this.helpers.httpRequestWithAuthentication.call(this, 'cyberPulseHttpHeaderAuthApi', {
 					method: 'GET',
 					url,
 					json: true,
