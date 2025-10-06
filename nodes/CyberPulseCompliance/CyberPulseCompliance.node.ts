@@ -121,7 +121,10 @@ export class CyberPulseCompliance implements INodeType {
 		usableAsTool: true,
 
 		// Use our custom HTTP Header credential (x-api-key)
-		credentials: [{ name: 'cyberPulseHttpHeaderAuthApi', required: true }],
+		credentials: [
+ 		  { name: 'httpHeaderAuth', required: false },
+ 		  { name: 'cyberPulseHttpHeaderAuthApi', required: false },
+		],
 
 		properties: [
 			{
@@ -168,11 +171,9 @@ export class CyberPulseCompliance implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		// Ensure the credential exists
-		const hasCreds = await this.getCredentials('cyberPulseHttpHeaderAuthApi').catch(() => null);
-		if (!hasCreds) {
-			throw new NodeOperationError(this.getNode(), 'Missing credentials: select “CyberPulse Header” and save.');
-		}
+		// DEBUG: load and print the credential n8n is giving this node
+		const creds = await this.getCredentials('cyberPulseHttpHeaderAuthApi').catch(() => null);
+		throw new NodeOperationError(this.getNode(), 'CRED DEBUG ' + JSON.stringify({ credName: 'cyberPulseHttpHeaderAuthApi', hasApiKey: !!(creds as any)?.apiKey }));
 
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
