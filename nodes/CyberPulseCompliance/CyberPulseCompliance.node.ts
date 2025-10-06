@@ -12,6 +12,7 @@ type Crosswalk = Record<string, Record<string, Clause[]>>;
 
 /** Your API Gateway base URL (override with env CP_API_BASE if needed) */
 const API_BASE = 'https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod';
+
 const DEFAULT_CROSSWALK: Crosswalk = {
 	mfa: {
 		'ISO 27001': [{ clause: 'A.5.17', title: 'Authentication information', framework: 'ISO 27001' }],
@@ -103,9 +104,15 @@ const FRIENDLY_STATUS: Record<number, string> = {
 function extractHttpStatus(err: any): number | undefined {
 	return err?.response?.status ?? err?.cause?.response?.status ?? err?.status;
 }
-
 function extractHttpBody(err: any): unknown {
 	return err?.response?.data ?? err?.cause?.response?.data ?? err?.message;
+}
+
+/** pick whichever credential exists on the instance */
+async function resolveCred(this: IExecuteFunctions): Promise<'cyberPulseHttpHeaderAuthApi' | 'httpHeaderAuth'> {
+	try { await this.getCredentials('cyberPulseHttpHeaderAuthApi'); return 'cyberPulseHttpHeaderAuthApi'; } catch {}
+	await this.getCredentials('httpHeaderAuth'); // throws if missing
+	return 'httpHeaderAuth';
 }
 
 export class CyberPulseCompliance implements INodeType {
@@ -120,10 +127,10 @@ export class CyberPulseCompliance implements INodeType {
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
 
-		// Use our custom HTTP Header credential (x-api-key)
+		// allow either custom x-api-key credential or generic header auth
 		credentials: [
- 		  { name: 'httpHeaderAuth', required: false },
- 		  { name: 'cyberPulseHttpHeaderAuthApi', required: false },
+			{ name: 'cyberPulseHttpHeaderAuthApi', required: false },
+			{ name: 'httpHeaderAuth', required: false },
 		],
 
 		properties: [
@@ -171,16 +178,14 @@ export class CyberPulseCompliance implements INodeType {
 	};
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
-		// DEBUG: load and print the credential n8n is giving this node
-		const creds = await this.getCredentials('cyberPulseHttpHeaderAuthApi').catch(() => null);
-		throw new NodeOperationError(this.getNode(), 'CRED DEBUG ' + JSON.stringify({ credName: 'cyberPulseHttpHeaderAuthApi', hasApiKey: !!(creds as any)?.apiKey }));
+		const credName = await resolveCred.call(this);
 
 		const items = this.getInputData();
 		const output: INodeExecutionData[] = [];
 
 		/** Hit the metered API so usage plan + friendly codes apply */
 		try {
-			await this.helpers.httpRequestWithAuthentication.call(this, 'cyberPulseHttpHeaderAuthApi', {
+			await this.helpers.httpRequestWithAuthentication.call(this, credName, {
 				method: 'POST',
 				url: `${API_BASE}/v1/evaluate-controls`,
 				json: true,
@@ -190,36 +195,32 @@ export class CyberPulseCompliance implements INodeType {
 					evidence: [],
 				},
 			});
-		} catch (err) {
-			const status = extractHttpStatus(err);
-			if (status && FRIENDLY_STATUS[status]) {
-				const desc = extractHttpBody(err);
-				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[status], {
-					description: typeof desc === 'string' ? desc : JSON.stringify(desc ?? {}),
+		} catch (err: any) {
+			const s = extractHttpStatus(err);
+			if (typeof s === 'number' && (s in FRIENDLY_STATUS)) {
+				const d = extractHttpBody(err) as any;
+				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[s as keyof typeof FRIENDLY_STATUS], {
+					description: typeof d === 'string' ? d : JSON.stringify(d ?? {}),
 					itemIndex: 0,
 				});
 			}
-			throw err;
+			throw new NodeOperationError(this.getNode(), err?.message ?? 'Request failed', { itemIndex: 0 });
 		}
 
-		// Optional crosswalk fetch (also via Header Auth)
+		// Optional crosswalk fetch (no auth assumed; add credName here if your URL needs it)
 		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
 		try {
 			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
 			if (url) {
-				const res = await this.helpers.httpRequest({
-					method: 'GET',
-					url,
-					json: true,
-				});
+				const res = await this.helpers.httpRequest({ method: 'GET', url, json: true });
 				if (res) crosswalk = res as Crosswalk;
 			}
-		} catch (err) {
-			const status = extractHttpStatus(err);
-			if (status && FRIENDLY_STATUS[status]) {
-				const desc = extractHttpBody(err);
-				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[status], {
-					description: typeof desc === 'string' ? desc : JSON.stringify(desc ?? {}),
+		} catch (err: any) {
+			const s = extractHttpStatus(err);
+			if (typeof s === 'number' && (s in FRIENDLY_STATUS)) {
+				const d = extractHttpBody(err) as any;
+				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[s as keyof typeof FRIENDLY_STATUS], {
+					description: typeof d === 'string' ? d : JSON.stringify(d ?? {}),
 					itemIndex: 0,
 				});
 			}
