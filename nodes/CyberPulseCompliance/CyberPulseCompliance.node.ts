@@ -129,8 +129,7 @@ export class CyberPulseCompliance implements INodeType {
 
 		// allow either custom x-api-key credential or generic header auth
 		credentials: [
-			{ name: 'cyberPulseHttpHeaderAuthApi', required: false },
-			{ name: 'httpHeaderAuth', required: false },
+			{ name: 'cyberPulseHttpHeaderAuthApi', required: false },	
 		],
 
 		properties: [
