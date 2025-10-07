@@ -4,7 +4,7 @@ import type { ICredentialType, ICredentialTestRequest, INodeProperties } from 'n
 export class CyberPulseHttpHeaderAuth implements ICredentialType {
   name = 'cyberPulseHttpHeaderAuthApi';
   displayName = 'CyberPulse HTTP Header Auth';
-
+  
   properties: INodeProperties[] = [
     {
       displayName: 'API Key',
@@ -15,18 +15,20 @@ export class CyberPulseHttpHeaderAuth implements ICredentialType {
       description: 'Sent as x-api-key header',
     },
   ];
-
+  
   authenticate = {
     type: 'generic' as const,
     properties: {
       headers: {
-        'x-api-key': '{{$credentials.apiKey}}',
+        'x-api-key': '={{$credentials.apiKey}}',  // ✅ FIXED: Added = sign
       },
     },
   };
-
-  // verify header is attached
+  
   test: ICredentialTestRequest = {
-    request: { url: 'https://httpbin.org/headers', method: 'GET' },
+    request: {
+      url: 'https://httpbin.org/headers',
+      method: 'GET'
+    },
   };
 }
