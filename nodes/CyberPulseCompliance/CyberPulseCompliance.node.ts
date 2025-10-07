@@ -77,20 +77,178 @@ function classifyCategories(text: string): string[] {
 	return Array.from(hits);
 }
 
+/**
+ * REALISTIC COMPLIANCE SCORING SYSTEM
+ * Provides consistent, evidence-based scores with confidence metrics
+ */
 function scoreFor(
 	categories: string[],
 	evidenceCount: number,
-): { score: number; status: 'Compliant' | 'Partial' | 'Non-Compliant' } {
-	const weights: Record<string, number> = { mfa: 25, encryption: 20, logging: 15, backups: 15, patching: 15, access_reviews: 10 };
-	let raw = 0;
-	for (const c of categories) raw += weights[c] ?? 0;
-	const boost = Math.min(evidenceCount * 5, 10);
-	const score = Math.min(raw + boost, 100);
+	controlText: string = '',
+	evidenceUrls: string[] = []
+): { 
+	score: number; 
+	status: 'Compliant' | 'Partial' | 'Non-Compliant';
+	confidence: number;
+	evaluation: 'Compliant' | 'Non-Compliant';
+	rationale: string;
+} {
+	// --- 1. CONTROL TEXT QUALITY ANALYSIS (0-30 points) ---
+	let controlQualityScore = 0;
+	
+	const hasSpecificRequirements = /\d+|all|every|must|require|enforce|minimum|maximum/.test(controlText.toLowerCase());
+	const hasActionableVerbs = /(implement|configure|enable|enforce|review|monitor|test|validate|verify)/.test(controlText.toLowerCase());
+	const wordCount = controlText.split(/\s+/).filter(w => w.length > 0).length;
+	
+	if (wordCount >= 10 && wordCount <= 100) controlQualityScore += 10;
+	else if (wordCount > 5) controlQualityScore += 5;
+	
+	if (hasSpecificRequirements) controlQualityScore += 10;
+	if (hasActionableVerbs) controlQualityScore += 10;
+	
+	// --- 2. CATEGORY COVERAGE ANALYSIS (0-25 points) ---
+	let categoryScore = 0;
+	
+	const categoryWeights: Record<string, number> = {
+		mfa: 8,
+		encryption: 7,
+		access_reviews: 6,
+		patching: 6,
+		logging: 5,
+		backups: 5,
+	};
+	
+	for (const cat of categories) {
+		categoryScore += categoryWeights[cat] || 3;
+	}
+	categoryScore = Math.min(categoryScore, 25);
+	
+	// --- 3. EVIDENCE QUALITY ANALYSIS (0-35 points) ---
+	let evidenceScore = 0;
+	
+	if (evidenceCount === 0) {
+		evidenceScore = 0;
+	} else if (evidenceCount === 1) {
+		evidenceScore = 15;
+	} else if (evidenceCount === 2) {
+		evidenceScore = 22;
+	} else if (evidenceCount === 3) {
+		evidenceScore = 28;
+	} else if (evidenceCount >= 4) {
+		evidenceScore = 35;
+	}
+	
+	// Bonus for diverse evidence types
+	const evidenceTypes = new Set<string>();
+	for (const url of evidenceUrls) {
+		const lower = url.toLowerCase();
+		if (/\.(pdf|docx?|txt)/.test(lower)) evidenceTypes.add('document');
+		if (/\.(png|jpe?g|gif|webp)/.test(lower)) evidenceTypes.add('screenshot');
+		if (/\.(json|ya?ml|xml|conf|config)/.test(lower)) evidenceTypes.add('config');
+		if (/(dashboard|portal|console|admin)/.test(lower)) evidenceTypes.add('portal');
+	}
+	if (evidenceTypes.size >= 2 && evidenceCount > 0) {
+		evidenceScore += 5;
+	}
+	
+	// --- 4. IMPLEMENTATION DEPTH ANALYSIS (0-10 points) ---
+	let implementationScore = 0;
+	
+	const implementationKeywords = [
+		'configured', 'deployed', 'enabled', 'implemented', 'enforced',
+		'active', 'running', 'operational', 'production', 'documented'
+	];
+	
+	const implementationMatches = implementationKeywords.filter(kw => 
+		controlText.toLowerCase().includes(kw)
+	).length;
+	
+	implementationScore = Math.min(implementationMatches * 3, 10);
+	
+	// --- 5. CALCULATE TOTAL SCORE (0-100) ---
+	const totalScore = Math.round(
+		controlQualityScore + 
+		categoryScore + 
+		evidenceScore + 
+		implementationScore
+	);
+	
+	// --- 6. CALCULATE CONFIDENCE (0-100) ---
+	let confidence = 0;
+	
+	if (evidenceCount === 0) confidence = 20;
+	else if (evidenceCount === 1) confidence = 45;
+	else if (evidenceCount === 2) confidence = 65;
+	else if (evidenceCount === 3) confidence = 80;
+	else if (evidenceCount >= 4) confidence = 95;
+	
+	if (wordCount < 5) confidence -= 15;
+	else if (wordCount >= 20) confidence += 5;
+	
+	if (hasSpecificRequirements && hasActionableVerbs) confidence += 5;
+	
+	confidence = Math.max(20, Math.min(confidence, 100));
+	
+	// --- 7. DETERMINE STATUS ---
 	let status: 'Compliant' | 'Partial' | 'Non-Compliant';
-	if (score >= 85) status = 'Compliant';
-	else if (score >= 60) status = 'Partial';
-	else status = 'Non-Compliant';
-	return { score, status };
+	
+	if (totalScore >= 85 && evidenceCount >= 2) {
+		status = 'Compliant';
+	} else if (totalScore >= 60 && evidenceCount >= 1) {
+		status = 'Partial';
+	} else if (totalScore >= 60 && evidenceCount === 0) {
+		status = 'Partial';
+	} else {
+		status = 'Non-Compliant';
+	}
+	
+	// --- 8. DETERMINE EVALUATION (Binary) ---
+	const evaluation: 'Compliant' | 'Non-Compliant' = 
+		(totalScore >= 85 && evidenceCount >= 2) ? 'Compliant' : 'Non-Compliant';
+	
+	// --- 9. GENERATE RATIONALE ---
+	const rationaleComponents: string[] = [];
+	
+	if (status === 'Compliant') {
+		rationaleComponents.push('Strong compliance demonstrated');
+	} else if (status === 'Partial') {
+		rationaleComponents.push('Partial compliance - improvement needed');
+	} else {
+		rationaleComponents.push('Non-compliant - significant gaps');
+	}
+	
+	rationaleComponents.push(`Score: ${totalScore}/100`);
+	
+	if (evidenceCount === 0) {
+		rationaleComponents.push('No evidence provided');
+	} else if (evidenceCount === 1) {
+		rationaleComponents.push('Minimal evidence (1 item)');
+	} else if (evidenceCount >= 4) {
+		rationaleComponents.push(`Comprehensive evidence (${evidenceCount} items)`);
+	} else {
+		rationaleComponents.push(`Evidence: ${evidenceCount} items`);
+	}
+	
+	if (categories.length > 0) {
+		rationaleComponents.push(`Categories: ${categories.join(', ')}`);
+	}
+	
+	if (wordCount < 10) {
+		rationaleComponents.push('Control text needs more detail');
+	}
+	if (!hasSpecificRequirements) {
+		rationaleComponents.push('Add specific requirements/thresholds');
+	}
+	
+	const rationale = rationaleComponents.join(' • ');
+	
+	return {
+		score: totalScore,
+		status,
+		confidence,
+		evaluation,
+		rationale
+	};
 }
 
 /** Friendly messages for metered API HTTP statuses */
@@ -117,12 +275,12 @@ async function resolveCred(this: IExecuteFunctions): Promise<'cyberPulseHttpHead
 
 export class CyberPulseCompliance implements INodeType {
 	description: INodeTypeDescription = {
-		displayName: 'CyberPulse Compliance (Dev 0.0.19)',
+		displayName: 'CyberPulse Compliance (Dev)',
 		name: 'cyberPulseCompliance',
 		group: ['transform'],
 		version: 6,
 		description: 'Evaluate a control & evidence, map to selected frameworks, and return a score/status.',
-		defaults: { name: 'CyberPulse Compliance (Dev 0.0.19)' },
+		defaults: { name: 'CyberPulse Compliance (Dev)' },
 		inputs: [NodeConnectionType.Main],
 		outputs: [NodeConnectionType.Main],
 		usableAsTool: true,
@@ -236,7 +394,14 @@ export class CyberPulseCompliance implements INodeType {
 				const frameworks = (this.getNodeParameter('frameworks', i, []) as string[]) || [];
 
 				const categories = classifyCategories(controlText);
-				let { score, status } = scoreFor(categories, evidenceUrls.length);
+				
+				// NEW: Call updated scoreFor with all parameters
+				let { score, status, confidence, evaluation, rationale } = scoreFor(
+					categories, 
+					evidenceUrls.length,
+					controlText,
+					evidenceUrls
+				);
 
 				const gaps: string[] = [];
 				if (evidenceUrls.length === 0) {
@@ -270,11 +435,14 @@ export class CyberPulseCompliance implements INodeType {
 						evidence: evidenceUrls,
 						status,
 						score,
+						confidence,        // NEW: Realistic confidence metric
+						evaluation,        // NEW: Binary compliance evaluation
+						rationale,         // NEW: Detailed rationale
 						mapped_requirements: mapped,
 						frameworks_selected: frameworks,
 						gaps,
 						actions,
-						notes: 'Prototype result. Tune keywords, weights, and crosswalk JSON for your org.',
+						notes: 'Realistic scoring based on control quality, evidence, and implementation depth.',
 					},
 				});
 			} catch (error) {
