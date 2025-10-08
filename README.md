@@ -53,7 +53,7 @@ Custom n8n node that evaluates compliance controls against major frameworks (ISO
 1. In n8n, go to **Settings → Community Nodes → Install**  
 2. Enter:
    ```bash
-   n8n-nodes-cyberpulse-compliance
+   n8n-nodes-cyberpulse-compliance-dev
 🔧 Usage
 
 Example workflow:

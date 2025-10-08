@@ -5,7 +5,7 @@ import type {
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
-import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
+import { NodeOperationError } from 'n8n-workflow';
 
 type Clause = { framework: string; clause: string; title: string };
 type Crosswalk = Record<string, Record<string, Clause[]>>;
@@ -281,8 +281,8 @@ export class CyberPulseCompliance implements INodeType {
 		version: 6,
 		description: 'Evaluate a control & evidence, map to selected frameworks, and return a score/status.',
 		defaults: { name: 'CyberPulse Compliance (Dev)' },
-		inputs: [NodeConnectionType.Main],
-		outputs: [NodeConnectionType.Main],
+		inputs: ['main'],
+		outputs: ['main'],
 		usableAsTool: true,
 
 		// allow either custom x-api-key credential or generic header auth

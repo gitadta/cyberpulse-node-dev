@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-cyberpulse-compliance-dev",
-  "version": "0.0.34",
+  "version": "0.0.39",
   "description": "Evaluate control statements against frameworks with realistic evidence-based scoring",
   "keywords": [
     "n8n-community-node-package"
@@ -15,9 +15,8 @@
     "type": "git",
     "url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance.git"
   },
-  "main": "index.js",
   "scripts": {
-    "build": "tsc && gulp build:icons",
+    "build": "tsc",
     "dev": "tsc --watch",
     "format": "prettier nodes credentials --write",
     "lint": "eslint nodes credentials package.json",
@@ -40,11 +39,7 @@
     "eslint": "^8.0.0",
     "eslint-plugin-n8n-nodes-base": "^1.0.0",
     "gulp": "^4.0.2",
-    "n8n-workflow": "^1.0.0",
     "prettier": "^3.0.0",
-    "typescript": "~4.9.0"
-  },
-  "peerDependencies": {
-    "n8n-workflow": "*"
+    "typescript": "^4.9.5"
   }
 }
