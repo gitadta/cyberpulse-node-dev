@@ -75,10 +75,10 @@ Example Output:
 
 Compliant | Partial | Non-Compliant (with notes and framework mapping)
 
-## 📦 Links
-- [npm package](https://www.npmjs.com/package/n8n-nodes-cyberpulse-compliance)
-- [GitHub repository](https://github.com/gitadta/n8n-nodes-cyberpulse-compliance)
-- [Report Issues](https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/issues)
+### Links
+- [npm package](https://www.npmjs.com/package/n8n-nodes-cyberpulse-compliance-dev)
+- [GitHub repository](https://github.com/gitadta/cyberpulse-node-dev)
+- [Report issues](https://github.com/gitadta/cyberpulse-node-dev/issues)
 
 
 📜 License

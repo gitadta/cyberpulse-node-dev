@@ -1,20 +1,26 @@
 {
   "name": "n8n-nodes-cyberpulse-compliance-dev",
-  "version": "0.0.39",
+  "version": "0.0.41",
   "description": "Evaluate control statements against frameworks with realistic evidence-based scoring",
   "keywords": [
     "n8n-community-node-package"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/",
+  "homepage": "https://github.com/gitadta/cyberpulse-node-dev",
   "author": {
     "name": "Adnan Tariq",
     "email": "info@cyberpulsesolutions.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance.git"
+    "url": "https://github.com/gitadta/cyberpulse-node-dev.git"
   },
+  "bugs": {
+    "url": "https://github.com/gitadta/cyberpulse-node-dev/issues"
+  },
+  "main": "dist/index.js",
+  "files": ["dist/**", "README.md", "LICENSE*"],
+  
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
