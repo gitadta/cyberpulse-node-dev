@@ -19,8 +19,9 @@
     "url": "https://github.com/gitadta/cyberpulse-node-dev/issues"
   },
   "main": "dist/index.js",
-  "files": ["dist/**", "README.md", "LICENSE*"],
-  
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
@@ -28,9 +29,6 @@
     "lint": "eslint nodes credentials package.json",
     "lintfix": "eslint nodes credentials package.json --fix"
   },
-  "files": [
-    "dist"
-  ],
   "n8n": {
     "n8nNodesApiVersion": 1,
     "credentials": [
