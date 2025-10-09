@@ -1,0 +1,52 @@
+{
+  "name": "cyberpulse-template.json",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [0, 0],
+      "name": "When clicking \"Execute workflow\""
+    },
+    {
+      "parameters": {
+        "url": "https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod/v1/health",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [208, 0],
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": { "name": "CyberPulse API Key" }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://6kq6c7p4r4.execute-api.us-east-1.amazonaws.com/prod/v1/evaluate-controls",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\"framework\":\"NIST CSF\",\"controls\":[\"AC-2\"],\"evidence\":[]}"
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [416, 0],
+      "name": "HTTP Request (Evaluate)",
+      "credentials": {
+        "httpHeaderAuth": { "name": "CyberPulse API Key" }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking \"Execute workflow\"": { "main": [[{ "node": "HTTP Request", "type": "main", "index": 0 }]] },
+    "HTTP Request": { "main": [[{ "node": "HTTP Request (Evaluate)", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "tags": []
+}

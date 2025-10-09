@@ -1,68 +1,49 @@
 {
-  "name": "n8n-nodes-cyberpulse-compliance",
-  "displayName": "CyberPulse Compliance",
-  "version": "1.0.7",
-  "description": "Evaluate control statements against frameworks (ISO 27001, NIST CSF, PCI DSS, Essential Eight, GDPR) with evidence-aware scoring and external crosswalk mappings.",
+  "name": "n8n-nodes-cyberpulse-compliance-dev",
+  "version": "0.0.41",
+  "description": "Evaluate control statements against frameworks with realistic evidence-based scoring",
   "keywords": [
-    "n8n",
-    "n8n-community-node-package",
-    "compliance",
-    "security",
-    "iso27001",
-    "nist",
-    "pci",
-    "essential-eight",
-    "gdpr"
+    "n8n-community-node-package"
   ],
   "license": "MIT",
-  "homepage": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/",
+  "homepage": "https://github.com/gitadta/cyberpulse-node-dev",
   "author": {
     "name": "Adnan Tariq",
     "email": "info@cyberpulsesolutions.com"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance.git"
+    "url": "https://github.com/gitadta/cyberpulse-node-dev.git"
   },
   "bugs": {
-    "url": "https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/issues"
-  },
-  "engines": {
-    "node": ">=20.15"
+    "url": "https://github.com/gitadta/cyberpulse-node-dev/issues"
   },
   "main": "dist/index.js",
-  "scripts": {
-    "build": "npx rimraf dist && tsc && gulp build:icons",
-    "dev": "tsc --watch",
-    "format": "prettier nodes --write",
-    "lint": "eslint nodes package.json",
-    "lintfix": "eslint nodes package.json --fix",
-    "prepublishOnly": "npm run build && eslint -c .eslintrc.prepublish.js nodes package.json"
-  },
   "files": [
-    "dist",
-    "README.md",
-    "LICENSE"
+    "dist"
   ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "format": "prettier nodes credentials --write",
+    "lint": "eslint nodes credentials package.json",
+    "lintfix": "eslint nodes credentials package.json --fix"
+  },
   "n8n": {
     "n8nNodesApiVersion": 1,
-    "credentials": [],
+    "credentials": [
+      "dist/credentials/CyberPulseHttpHeaderAuth.credentials.js"
+    ],
     "nodes": [
       "dist/nodes/CyberPulseCompliance/CyberPulseCompliance.node.js"
     ]
   },
   "devDependencies": {
-    "@typescript-eslint/parser": "~8.32.0",
-    "eslint": "^8.57.0",
-    "eslint-plugin-n8n-nodes-base": "^1.16.3",
-    "gulp": "^5.0.0",
-    "prettier": "^3.5.3",
-    "typescript": "^5.8.2"
-  },
-  "peerDependencies": {
-    "n8n-workflow": "*"
-  },
-  "publishConfig": {
-    "access": "public"
+    "@typescript-eslint/parser": "~5.0.0",
+    "eslint": "^8.0.0",
+    "eslint-plugin-n8n-nodes-base": "^1.0.0",
+    "gulp": "^4.0.2",
+    "prettier": "^3.0.0",
+    "typescript": "^4.9.5"
   }
 }
