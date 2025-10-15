@@ -2,9 +2,9 @@
 
 1) Download the ready-to-import workflow:
    - **Raw JSON (direct import)**  
-     https://raw.githubusercontent.com/gitadta/n8n-nodes-cyberpulse-compliance/dev/examples/cyberpulse-template.json
+     https://raw.githubusercontent.com/gitadta/cyberpulse-node-dev/main/examples/cyberpulse-template.json
    - **Browse in GitHub (human-readable)**  
-     https://github.com/gitadta/n8n-nodes-cyberpulse-compliance/blob/dev/examples/cyberpulse-template.json
+     https://github.com/gitadta/cyberpulse-node-dev/blob/main/examples/cyberpulse-template.json
 
 2) In n8n: **Workflows → Import from file** and select the JSON.
 
