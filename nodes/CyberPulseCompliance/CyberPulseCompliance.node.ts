@@ -277,6 +277,7 @@ export class CyberPulseCompliance implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'CyberPulse Compliance (Dev)',
 		name: 'cyberPulseCompliance',
+		icon: 'file:complianceAgent.svg',
 		group: ['transform'],
 		version: 6,
 		description: 'Evaluate a control & evidence, map to selected frameworks, and return a score/status.',
