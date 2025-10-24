@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-cyberpulse-compliance-dev",
-  "version": "0.0.43",
+  "version": "0.0.44",
   "description": "Evaluate control statements against frameworks with realistic evidence-based scoring",
   "keywords": [
     "n8n-community-node-package"
