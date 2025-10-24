@@ -445,10 +445,11 @@ export class CyberPulseCompliance implements INodeType {
 						actions,
 						notes: 'Realistic scoring based on control quality, evidence, and implementation depth.',
 					},
+					pairedItem: { item: i },
 				});
 			} catch (error) {
 				if (this.continueOnFail()) {
-					output.push({ json: items[i]?.json ?? {}, error, pairedItem: i });
+					output.push({ json: items[i]?.json ?? {}, error, pairedItem: { item: i } });
 				} else {
 					if ((error as any).context) {
 						(error as any).context.itemIndex = i;
