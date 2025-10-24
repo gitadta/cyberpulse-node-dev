@@ -279,7 +279,7 @@ export class CyberPulseCompliance implements INodeType {
 		name: 'cyberPulseCompliance',
 		icon: 'file:complianceAgent.svg',
 		group: ['transform'],
-		version: 7,
+		version: 1,
 		description: 'Evaluate a control & evidence, map to selected frameworks, and return a score/status.',
 		defaults: { name: 'CyberPulse Compliance (Dev)' },
 		inputs: ['main'],
