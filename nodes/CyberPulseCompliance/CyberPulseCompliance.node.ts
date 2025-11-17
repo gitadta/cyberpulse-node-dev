@@ -308,7 +308,7 @@ export class CyberPulseCompliance implements INodeType {
  			   default: 'evaluate',
   		   displayOptions: { show: { resource: ['complianceControl'] } },
          options: [
-           { name: 'Evaluate', value: 'evaluate', description: 'Evaluate a control against frameworks' },
+           { name: 'Evaluate', value: 'evaluate', action: 'Evaluate compliance control', description: 'Evaluate a control against frameworks' },
          ],
      },
 
