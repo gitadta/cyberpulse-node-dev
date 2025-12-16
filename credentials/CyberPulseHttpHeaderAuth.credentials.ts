@@ -27,7 +27,7 @@ export class CyberPulseHttpHeaderAuth implements ICredentialType {
   
   test: ICredentialTestRequest = {
     request: {
-      url: 'https://httpbin.org/headers',
+      url: 'https://www.cyberpulsesolutions.com/api/n8n-credential-test',
       method: 'GET'
     },
   };
