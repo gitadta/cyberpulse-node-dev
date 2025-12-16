@@ -75,13 +75,15 @@ Example Output:
 
 Compliant | Partial | Non-Compliant (with notes and framework mapping)
 
-Allowed HTTP Request Domains (recommended)
-Set to:
+Credentials (required):
+
+Create a credential: CyberPulse HTTP Header Auth and paste your API Key
+
+In the same credential, set Allowed HTTP Request Domains to:
 
 www.cyberpulsesolutions.com
 
 6kq6c7p4r4.execute-api.us-east-1.amazonaws.com
-
 ### Links
 - [npm package](https://www.npmjs.com/package/n8n-nodes-cyberpulse-compliance-dev)
 - [GitHub repository](https://github.com/gitadta/cyberpulse-node-dev)
