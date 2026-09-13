@@ -344,14 +344,6 @@ export class CyberPulseCompliance implements INodeType {
 				],
 				description: 'Frameworks to map against',
 			},
-			{
-				displayName: 'Crosswalk URL',
-				name: 'crosswalkUrl',
-				type: 'string',
-				default: '',
-				placeholder: 'https://your-public-host/crosswalk.json',
-				description: 'Optional: URL to JSON crosswalk (overrides built-in)',
-			},
 		],
 	};
 
@@ -385,28 +377,7 @@ export class CyberPulseCompliance implements INodeType {
 			throw new NodeOperationError(this.getNode(), err?.message ?? 'Request failed', { itemIndex: 0 });
 		}
 
-		// Optional crosswalk fetch (no auth assumed; add credName here if your URL needs it)
 		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
-		try {
-			const url = (this.getNodeParameter('crosswalkUrl', 0, '') as string) || '';
-			if (url) {
-				const res = await this.helpers.httpRequest({ method: 'GET', url, json: true });
-				if (res) crosswalk = res as Crosswalk;
-			}
-		} catch (err: any) {
-			const s = extractHttpStatus(err);
-			if (typeof s === 'number' && (s in FRIENDLY_STATUS)) {
-				const d = extractHttpBody(err) as any;
-				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[s as keyof typeof FRIENDLY_STATUS], {
-					description: typeof d === 'string' ? d : JSON.stringify(d ?? {}),
-					itemIndex: 0,
-				});
-			}
-			throw new NodeOperationError(this.getNode(), 'Failed to fetch crosswalk JSON', {
-				description: (err as Error)?.message ?? 'Request failed',
-				itemIndex: 0,
-			});
-		}
 
 		for (let i = 0; i < items.length; i++) {
 			try {
