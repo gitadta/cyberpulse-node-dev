@@ -5,7 +5,7 @@ import type {
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
-import { NodeOperationError } from 'n8n-workflow';
+import { NodeConnectionTypes, NodeOperationError } from 'n8n-workflow';
 
 type Clause = { framework: string; clause: string; title: string };
 type Crosswalk = Record<string, Record<string, Clause[]>>;
@@ -259,11 +259,13 @@ const FRIENDLY_STATUS: Record<number, string> = {
 	429: 'Too many requests – rate limited',
 };
 
-function extractHttpStatus(err: any): number | undefined {
-	return err?.response?.status ?? err?.cause?.response?.status ?? err?.status;
+function extractHttpStatus(err: unknown): number | undefined {
+	const e = err as { response?: { status?: number }; cause?: { response?: { status?: number } }; status?: number };
+	return e?.response?.status ?? e?.cause?.response?.status ?? e?.status;
 }
-function extractHttpBody(err: any): unknown {
-	return err?.response?.data ?? err?.cause?.response?.data ?? err?.message;
+function extractHttpBody(err: unknown): unknown {
+	const e = err as { response?: { data?: unknown }; cause?: { response?: { data?: unknown } }; message?: unknown };
+	return e?.response?.data ?? e?.cause?.response?.data ?? e?.message;
 }
 
 /** pick whichever credential exists on the instance */
@@ -282,10 +284,11 @@ export class CyberPulseCompliance implements INodeType {
 		icon: 'file:complianceAgent.svg',
 		group: ['transform'],
 		version: 1,
+		subtitle: '={{$parameter["operation"]}}',
 		description: 'Evaluate a control & evidence, map to selected frameworks, and return a score/status.',
 		defaults: { name: 'CyberPulse Compliance (Dev)' },
-		inputs: ['main'],
-		outputs: ['main'],
+		inputs: [NodeConnectionTypes.Main],
+		outputs: [NodeConnectionTypes.Main],
 		usableAsTool: true,
 
 		// allow either custom x-api-key credential or generic header auth
@@ -295,24 +298,26 @@ export class CyberPulseCompliance implements INodeType {
 
 		properties: [
 			{
-  			 displayName: 'Resource',
-			   name: 'resource',
-			   type: 'options',
- 			   default: 'complianceControl',
-			   options: [
-   			   { name: 'Compliance Control', value: 'complianceControl' },
- 				 ],
-		  },
-		  {
-			   displayName: 'Operation',
-			   name: 'operation',
-			   type: 'options',
- 			   default: 'evaluate',
-  		   displayOptions: { show: { resource: ['complianceControl'] } },
-         options: [
-           { name: 'Evaluate', value: 'evaluate', action: 'Evaluate compliance control', description: 'Evaluate a control against frameworks' },
-         ],
-     },
+				displayName: 'Resource',
+				name: 'resource',
+				type: 'options',
+				noDataExpression: true,
+				default: 'complianceControl',
+				options: [
+					{ name: 'Compliance Control', value: 'complianceControl' },
+				],
+			},
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				default: 'evaluate',
+				displayOptions: { show: { resource: ['complianceControl'] } },
+				options: [
+					{ name: 'Evaluate', value: 'evaluate', action: 'Evaluate compliance control', description: 'Evaluate a control against frameworks' },
+				],
+			},
 
 			{
 				displayName: 'Control Text',
@@ -367,10 +372,10 @@ export class CyberPulseCompliance implements INodeType {
 					evidence: [],
 				},
 			});
-		} catch (err: any) {
+		} catch (err) {
 			const s = extractHttpStatus(err);
 			if (typeof s === 'number' && (s in FRIENDLY_STATUS)) {
-				const d = extractHttpBody(err) as any;
+				const d = extractHttpBody(err);
 				throw new NodeOperationError(this.getNode(), FRIENDLY_STATUS[s as keyof typeof FRIENDLY_STATUS], {
 					description: typeof d === 'string' ? d : JSON.stringify(d ?? {}),
 					itemIndex: 0,
@@ -379,7 +384,7 @@ export class CyberPulseCompliance implements INodeType {
 			throw new NodeOperationError(this.getNode(), err?.message ?? 'Request failed', { itemIndex: 0 });
 		}
 
-		let crosswalk: Crosswalk = DEFAULT_CROSSWALK;
+		const crosswalk: Crosswalk = DEFAULT_CROSSWALK;
 
 		for (let i = 0; i < items.length; i++) {
 			try {
@@ -390,12 +395,14 @@ export class CyberPulseCompliance implements INodeType {
 				const categories = classifyCategories(controlText);
 				
 				// NEW: Call updated scoreFor with all parameters
-				let { score, status, confidence, evaluation, rationale } = scoreFor(
-					categories, 
+				const scoreResult = scoreFor(
+					categories,
 					evidenceUrls.length,
 					controlText,
 					evidenceUrls
 				);
+				const { score, confidence, evaluation, rationale } = scoreResult;
+				let { status } = scoreResult;
 
 				const gaps: string[] = [];
 				if (evidenceUrls.length === 0) {
@@ -444,9 +451,9 @@ export class CyberPulseCompliance implements INodeType {
 				if (this.continueOnFail()) {
 					output.push({ json: items[i]?.json ?? {}, error, pairedItem: { item: i } });
 				} else {
-					if ((error as any).context) {
-						(error as any).context.itemIndex = i;
-						throw error;
+					const contextHolder = error as { context?: { itemIndex?: number } };
+					if (contextHolder.context) {
+						contextHolder.context.itemIndex = i;
 					}
 					throw new NodeOperationError(this.getNode(), error as Error, { itemIndex: i });
 				}
