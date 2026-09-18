@@ -268,7 +268,9 @@ function extractHttpBody(err: any): unknown {
 
 /** pick whichever credential exists on the instance */
 async function resolveCred(this: IExecuteFunctions): Promise<'cyberPulseHttpHeaderAuthApi' | 'httpHeaderAuth'> {
-	try { await this.getCredentials('cyberPulseHttpHeaderAuthApi'); return 'cyberPulseHttpHeaderAuthApi'; } catch {}
+	try { await this.getCredentials('cyberPulseHttpHeaderAuthApi'); return 'cyberPulseHttpHeaderAuthApi'; } catch {
+		// CyberPulse credential not configured; fall back to generic header auth.
+	}
 	await this.getCredentials('httpHeaderAuth'); // throws if missing
 	return 'httpHeaderAuth';
 }
