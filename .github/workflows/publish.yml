@@ -1,0 +1,54 @@
+name: Publish
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+
+      # Trusted publishing requires npm CLI 11.5.1+ for OIDC support.
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+
+      - run: npx @n8n/node-cli@latest lint
+
+      - run: node --test test/crosswalk-url.test.js
+
+      - run: npm run build
+
+  publish:
+    needs: verify
+    if: github.event_name == 'release' && github.event.action == 'published'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          registry-url: https://registry.npmjs.org
+
+      # Trusted publishing requires npm CLI 11.5.1+ for OIDC support.
+      - run: npm install -g npm@latest
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - run: npm publish --provenance --access public

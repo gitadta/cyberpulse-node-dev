@@ -4,7 +4,9 @@ import type { ICredentialType, ICredentialTestRequest, INodeProperties } from 'n
 export class CyberPulseHttpHeaderAuth implements ICredentialType {
   name = 'cyberPulseHttpHeaderAuthApi';
   displayName = 'CyberPulse HTTP Header Auth';
-  
+  icon = 'file:../nodes/CyberPulseCompliance/complianceAgent.svg' as const;
+  documentationUrl = 'https://github.com/gitadta/cyberpulse-node-dev';
+
   properties: INodeProperties[] = [
     {
       displayName: 'API Key',

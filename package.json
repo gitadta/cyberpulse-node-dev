@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-cyberpulse-compliance-dev",
-  "version": "0.0.52",
+  "version": "0.0.53",
   "description": "Evaluate control statements against frameworks with realistic evidence-based scoring",
   "keywords": [
     "n8n-community-node-package"
@@ -42,11 +42,10 @@
   "n8n-workflow": "*"
 },
 "devDependencies": {
-  "@typescript-eslint/parser": "~5.0.0",
-  "eslint": "^8.0.0",
-  "eslint-plugin-n8n-nodes-base": "^1.0.0",
+  "@n8n/node-cli": "*",
+  "eslint": "9.39.4",
   "gulp": "^4.0.2",
   "prettier": "^3.0.0",
-  "typescript": "^4.9.5"
+  "typescript": "5.9.3"
 }
 }
